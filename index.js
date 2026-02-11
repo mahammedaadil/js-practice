@@ -3,6 +3,7 @@ const searchInput = document.getElementById("name-filter-input");
 let switchMode = 0;
 let currentEditId = null;
 let userData = [];
+let dropDown = document.getElementById("display-records");
 
 const setLocalStorage = (data) => {
   localStorage.setItem("userData", JSON.stringify(data));
@@ -384,8 +385,15 @@ const ascDecNormal = (key, type) => {
 
 const filterByName = () => {
   const toSearch = searchInput.value.toUpperCase();
-  const filteredData = userData.filter((d) => {
-    return d.name.toUpperCase().includes(toSearch);
+  const filteredData = userData.filter((user) => {
+    return user.name.toUpperCase().includes(toSearch);
   });
   displayData(filteredData);
+};
+
+const dataLimit = () => {
+  const limit = parseInt(dropDown.value);
+  const data = userData;
+  const topRecords = data.slice(0, limit);
+  displayData(topRecords);
 };
