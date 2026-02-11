@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Problem 2</title>
+  </head>
+  <body>
+    <button id="addBtn" onclick="createNewRow()">Add</button>
+    <input
+      id="name-filter-input"
+      placeholder="Search By Name"
+      onkeyup="filterByName()"
+    />
+
+    <table border="1">
+      <thead>
+        <tr id="table-head-row">
+          <th id="table-head-id" ondblclick="ascDecNormal('id', 'number')">
+            Id
+          </th>
+          <th id="table-head-name" ondblclick="ascDecNormal('name', 'string')">
+            Name
+          </th>
+          <th id="table-head-age" ondblclick="ascDecNormal('age', 'number')">
+            Age
+          </th>
+          <th
+            id="table-head-gender"
+            ondblclick="ascDecNormal('gender', 'string')"
+          >
+            Gender
+          </th>
+          <th id="table-head-action">Action</th>
+        </tr>
+      </thead>
+
+      <tbody id="table-body"></tbody>
+    </table>
+    <h2 id="for-asc-dec-normal"></h2>
+    <script src="index.js"></script>
+  </body>
+</html>
