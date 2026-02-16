@@ -1,9 +1,13 @@
 const tableBody = document.getElementById("table-body");
 const searchInput = document.getElementById("name-filter-input");
+let dropDown = document.getElementById("display-records");
+const pagesDiv = document.getElementById("pages-btns");
 let switchMode = 0;
 let currentEditId = null;
 let userData = [];
-let dropDown = document.getElementById("display-records");
+let currentPage = 1;
+let recordsPerPage = 5;
+let currentGenderEditIndex = null;
 
 const setLocalStorage = (data) => {
   localStorage.setItem("userData", JSON.stringify(data));
@@ -15,7 +19,14 @@ const getLocalStorage = () => {
 
 window.addEventListener("load", () => {
   userData = getLocalStorage() || [];
-  displayData(userData);
+  displayData(pageIndexing(userData));
+  renderPages();
+});
+
+window.addEventListener("click", (e) => {
+  if (!tableBody.contains(e.target)) {
+    onGenderFocusOutEvent(currentGenderEditIndex);
+  }
 });
 
 const displayData = (users) => {
@@ -34,13 +45,17 @@ const dataRawRendering = (index, newUser) => {
   const tdId = document.createElement("td");
   tdId.id = `td-id:${index}`;
   tdId.textContent = newUser.id;
+  tdId.ondblclick = () => dblClickEdit(index, "id", "number");
   const tdName = document.createElement("td");
   tdName.id = `td-name:${index}`;
   tdName.textContent = newUser.name;
+  tdName.ondblclick = () => dblClickEdit(index, "name", "text");
   const tdAge = document.createElement("td");
   tdAge.id = `td-age:${index}`;
   tdAge.textContent = newUser.age;
+  tdAge.ondblclick = () => dblClickEdit(index, "age", "number");
   const tdGender = document.createElement("td");
+  tdGender.ondblclick = () => onGenderDblClickEdit(index);
   tdGender.id = `td-gender:${index}`;
   tdGender.textContent = newUser.gender;
   const tdButtons = document.createElement("td");
@@ -57,7 +72,8 @@ const dataRawRendering = (index, newUser) => {
   deleteBtn.addEventListener("click", () => {
     addBtn.disabled = false;
     deleteData(index);
-    displayData(userData);
+    displayData(pageIndexing(userData));
+    renderPages();
   });
   editBtn.onclick = () => {
     const newDataRow = document.getElementById("newDataRow");
@@ -67,7 +83,6 @@ const dataRawRendering = (index, newUser) => {
   if (editableDataRaw) {
     editableDataRaw.replaceWith(dataRow);
   }
-  onDblClickEdit(index, newUser);
 };
 
 const createNewRow = () => {
@@ -95,7 +110,7 @@ const createNewRow = () => {
   const genderData = document.createElement("td");
   const genderMaleInput = document.createElement("input");
   const genderFemaleInput = document.createElement("input");
-  genderData.innerHTML = `<label>Male/Female</label>`;
+  genderData.innerHTML = `<label for="male">Male</label>`;
   genderMaleInput.setAttribute("id", "male");
   genderFemaleInput.setAttribute("id", "female");
   genderMaleInput.setAttribute("type", "radio");
@@ -105,6 +120,7 @@ const createNewRow = () => {
   genderMaleInput.setAttribute("name", "gender");
   genderFemaleInput.setAttribute("name", "gender");
   genderData.appendChild(genderMaleInput);
+  genderData.innerHTML += `<label for="female">Female</label>`;
   genderData.appendChild(genderFemaleInput);
   const buttonsColumn = document.createElement("td");
   const saveBtn = document.createElement("button");
@@ -132,7 +148,8 @@ const createNewRow = () => {
     };
     userData.push(newData);
     setLocalStorage(userData);
-    displayData(userData);
+    displayData(pageIndexing(userData));
+    renderPages();
   });
 };
 
@@ -160,6 +177,7 @@ const editDataRow = (funUser, index) => {
   const tdGender = document.createElement("td");
   const inputMaleGender = document.createElement("input");
   inputMaleGender.setAttribute("type", "radio");
+  inputMaleGender.setAttribute("id", "male");
   inputMaleGender.setAttribute("name", `gender-${index}`);
   inputMaleGender.setAttribute("value", "male");
   if (funUser.gender === "male") {
@@ -167,13 +185,16 @@ const editDataRow = (funUser, index) => {
   }
   const inputFemaleGender = document.createElement("input");
   inputFemaleGender.setAttribute("type", "radio");
+  inputFemaleGender.setAttribute("id", "female");
   inputFemaleGender.setAttribute("name", `gender-${index}`);
   inputFemaleGender.setAttribute("value", "female");
   if (funUser.gender === "female") {
     inputFemaleGender.checked = true;
   }
-  tdGender.innerHTML = `<label>Male/Female</label>`;
-  tdGender.append(inputMaleGender, inputFemaleGender);
+  tdGender.innerHTML = `<label for="male">Male</label>`;
+  tdGender.appendChild(inputMaleGender);
+  tdGender.innerHTML += `<label for="female">Female</label>`;
+  tdGender.appendChild(inputFemaleGender);
   const tdAction = document.createElement("td");
   const saveBtn = document.createElement("button");
   saveBtn.textContent = "Save";
@@ -204,12 +225,14 @@ const editDataRow = (funUser, index) => {
     setLocalStorage(updatadData);
     userData = updatadData;
     currentEditId = null;
-    displayData(userData);
+    displayData(pageIndexing(userData));
+    renderPages();
   };
   cancelBtn.addEventListener("click", () => {
     addBtn.disabled = false;
     currentEditId = null;
-    displayData(userData);
+    displayData(pageIndexing(userData));
+    renderPages();
   });
 };
 
@@ -220,137 +243,92 @@ const deleteData = (index) => {
   userData = data;
 };
 
-const onDblClickEdit = (index, changeUser) => {
-  const tdId = document.getElementById(`td-id:${index}`);
-  const tdName = document.getElementById(`td-name:${index}`);
-  const tdAge = document.getElementById(`td-age:${index}`);
+const dblClickEdit = (index, field, type) => {
+  if (currentGenderEditIndex != null) {
+    onGenderFocusOutEvent(currentGenderEditIndex);
+  }
+
+  const changeUser = userData[index];
+  const cell = document.getElementById(`td-${field}:${index}`);
+  const changedCell = document.createElement("td");
+  changedCell.id = `td-change-${field}:${index}`;
+  const changeInput = document.createElement("input");
+  changeInput.oninput = () => {
+    changeUser[field] = changeInput.value;
+    setLocalStorage(userData);
+  };
+  changeInput.setAttribute("type", type);
+  changeInput.id = `change-${field}:${index}`;
+  changeInput.value = changeUser[field];
+  changedCell.append(changeInput);
+  cell.replaceWith(changedCell);
+  changeInput.focus();
+  changeInput.addEventListener("focusout", () => {
+    let newCell = document.createElement("td");
+    newCell.id = `td-${field}:${index}`;
+    newCell.textContent = changeUser[field];
+    changedCell.replaceWith(newCell);
+    newCell.ondblclick = () => dblClickEdit(index, field, type);
+  });
+};
+
+const onGenderFocusOutEvent = (idx) => {
+  const tdGenderChange = document.getElementById(`td-gender-change:${idx}`);
+  const user = userData[idx];
+  let tdGender = document.createElement("td");
+  tdGender.id = `td-gender:${idx}`;
+  tdGender.textContent = user.gender;
+  tdGenderChange.replaceWith(tdGender);
+  tdGender.ondblclick = () => onGenderDblClickEdit(idx);
+  currentGenderEditIndex = null;
+};
+
+const onGenderDblClickEdit = (index) => {
+  const changeUser = userData[index];
   const tdGender = document.getElementById(`td-gender:${index}`);
-  const trDblClickEdit = document.createElement("tr");
-  trDblClickEdit.id = `tr-dbl-click-edit-id:${index}`;
-  const tdChangeId = document.createElement("td");
-  tdChangeId.id = `tr-change-id:${index}`;
-  const tdChangeName = document.createElement("td");
-  tdChangeName.id = `td-change-name:${index}`;
-  const tdChangeAge = document.createElement("td");
-  tdChangeAge.id = `td-change-age:${index}`;
   const tdGenderChange = document.createElement("td");
   tdGenderChange.id = `td-gender-change:${index}`;
-  trDblClickEdit.append(tdChangeId, tdChangeName, tdChangeAge, tdGenderChange);
-  tdId.ondblclick = () => {
-    const changeId = document.createElement("input");
-    changeId.setAttribute("type", "number");
-    changeId.id = `change-id:${index}`;
-    changeId.value = changeUser.id;
-    tdChangeId.append(changeId);
-    tdId.replaceWith(tdChangeId);
-    changeId.addEventListener("input", () => {
-      changeUser.id = changeId.value;
-      setLocalStorage(userData);
-    });
-    changeId.addEventListener("focusout", () => {
-      let tdId = document.createElement("td");
-      tdId.id = `td-id:${index}`;
-      tdId.textContent = changeUser.id;
-      tdChangeId.replaceWith(tdId);
-      tdId.ondblclick = () => {
-        tdId.replaceWith(tdChangeId);
-      };
-    });
-  };
 
-  tdName.ondblclick = () => {
-    const changeName = document.createElement("input");
-    changeName.setAttribute("type", "text");
-    changeName.id = `change-name:${index}`;
-    changeName.value = changeUser.name;
-    tdChangeName.append(changeName);
-    tdName.replaceWith(tdChangeName);
-    changeName.addEventListener("input", () => {
-      changeUser.name = changeName.value;
-      setLocalStorage(userData);
-    });
-    changeName.addEventListener("focusout", () => {
-      let tdName = document.createElement("td");
-      tdName.id = `td-name:${index}`;
-      tdName.textContent = changeUser.name;
-      tdChangeName.replaceWith(tdName);
-      tdName.ondblclick = () => {
-        tdName.replaceWith(tdChangeName);
-      };
-    });
-  };
+  if (currentGenderEditIndex != null) {
+    onGenderFocusOutEvent(currentGenderEditIndex);
+  }
+  currentGenderEditIndex = index;
 
-  tdAge.ondblclick = () => {
-    const changeAge = document.createElement("input");
-    changeAge.setAttribute("type", "number");
-    changeAge.id = `change-age:${index}`;
-    changeAge.value = changeUser.age;
-    tdChangeAge.append(changeAge);
-    tdAge.replaceWith(tdChangeAge);
-    changeAge.addEventListener("input", () => {
-      changeUser.age = changeAge.value;
-      setLocalStorage(userData);
-    });
-    changeAge.addEventListener("focusout", () => {
-      let tdAge = document.createElement("td");
-      tdAge.id = `td-age:${index}`;
-      tdAge.textContent = changeUser.age;
-      tdChangeAge.replaceWith(tdAge);
-      tdAge.ondblclick = () => {
-        tdAge.replaceWith(tdChangeAge);
-      };
-    });
-  };
+  const changeGenderFemale = document.createElement("input");
+  changeGenderFemale.setAttribute("type", "radio");
+  changeGenderFemale.setAttribute("name", `gender-${index}`);
+  changeGenderFemale.id = `change-female:${index}`;
+  changeGenderFemale.value = "female";
+  if (changeUser.gender == "female") {
+    changeGenderFemale.checked = true;
+  }
+  changeGenderFemale.addEventListener("click", () => {
+    changeUser.gender = changeGenderFemale.value;
+    setLocalStorage(userData);
+    onGenderFocusOutEvent(index);
+  });
 
-  tdGender.ondblclick = () => {
-    const spanChange = document.createElement("span");
-    spanChange.textContent = "Male/Female";
-    const changeGenderMale = document.createElement("input");
-    changeGenderMale.setAttribute("type", "radio");
-    changeGenderMale.setAttribute("name", "gender");
-    changeGenderMale.id = `change-male:${index}`;
-    changeGenderMale.value = "male";
-    if (changeUser.gender == "male") {
-      changeGenderMale.checked = true;
-    }
-    changeGenderMale.addEventListener("click", () => {
-      changeUser.gender = changeGenderMale.value;
-      setLocalStorage(userData);
-    });
-    changeGenderMale.addEventListener("focusout", () => {
-      let tdGender = document.createElement("td");
-      tdGender.id = `td-gender:${index}`;
-      tdGender.textContent = changeUser.gender;
-      tdGenderChange.replaceWith(tdGender);
-      tdGender.ondblclick = () => {
-        tdGender.replaceWith(tdGenderChange);
-      };
-    });
+  const changeGenderMale = document.createElement("input");
+  changeGenderMale.setAttribute("type", "radio");
+  changeGenderMale.setAttribute("name", `gender-${index}`);
+  changeGenderMale.id = `change-male:${index}`;
+  changeGenderMale.value = "male";
+  if (changeUser.gender == "male") {
+    changeGenderMale.checked = true;
+  }
+  changeGenderMale.addEventListener("click", () => {
+    changeUser.gender = changeGenderMale.value;
+    setLocalStorage(userData);
+    onGenderFocusOutEvent(index);
+  });
+  tdGenderChange.innerHTML = `<label for="change-male:${index}">Male</label>`;
+  tdGenderChange.appendChild(changeGenderMale);
 
-    const changeGenderFemale = document.createElement("input");
-    changeGenderFemale.setAttribute("type", "radio");
-    changeGenderFemale.setAttribute("name", "gender");
-    changeGenderFemale.id = `change-female:${index}`;
-    changeGenderFemale.value = "female";
-    if (changeUser.gender == "female") {
-      changeGenderFemale.checked = true;
-    }
-    changeGenderFemale.addEventListener("click", () => {
-      changeUser.gender = changeGenderFemale.value;
-      setLocalStorage(userData);
-    });
-    changeGenderFemale.addEventListener("focusout", () => {
-      let tdGender = document.createElement("td");
-      tdGender.id = `td-gender:${index}`;
-      tdGender.textContent = changeUser.gender;
-      tdGenderChange.replaceWith(tdGender);
-      tdGender.ondblclick = () => {
-        tdGender.replaceWith(tdGenderChange);
-      };
-    });
-    tdGenderChange.append(spanChange, changeGenderMale, changeGenderFemale);
-    tdGender.replaceWith(tdGenderChange);
-  };
+  const changeGenderFemaleLabel = document.createElement("label");
+  changeGenderFemaleLabel.innerText = "Female";
+  changeGenderFemaleLabel.setAttribute("for", `change-female:${index}`);
+  tdGenderChange.append(changeGenderFemaleLabel, changeGenderFemale);
+  tdGender.replaceWith(tdGenderChange);
 };
 
 const compare = (key, type) => {
@@ -371,14 +349,16 @@ const compare = (key, type) => {
 const ascDecNormal = (key, type) => {
   if (switchMode === 0) {
     const dec = userData.toSorted(compare(key, type));
-    displayData(dec);
+    displayData(pageIndexing(dec));
+    renderPages();
     switchMode += 1;
   } else if (switchMode === 1) {
     const asc = userData.toSorted(compare(key, type));
-    displayData(asc);
+    displayData(pageIndexing(asc));
+    renderPages();
     switchMode += 1;
   } else {
-    displayData(userData);
+    displayData(pageIndexing(userData));
     switchMode = 0;
   }
 };
@@ -388,12 +368,76 @@ const filterByName = () => {
   const filteredData = userData.filter((user) => {
     return user.name.toUpperCase().includes(toSearch);
   });
-  displayData(filteredData);
+  displayData(pageIndexing(filteredData));
+  renderPages();
 };
 
 const dataLimit = () => {
-  const limit = parseInt(dropDown.value);
   const data = userData;
+  const limit = parseInt(dropDown.value);
+  recordsPerPage = limit;
   const topRecords = data.slice(0, limit);
   displayData(topRecords);
+  renderPages();
+  if (limit === 0) {
+    displayData(pageIndexing(data));
+  }
+};
+
+const pageIndexing = (data) => {
+  let startIndex = (currentPage - 1) * recordsPerPage;
+  let endIndex = startIndex + recordsPerPage;
+  return data.slice(startIndex, endIndex);
+};
+
+const renderPages = () => {
+  pagesDiv.innerHTML = "";
+  let total = Math.ceil(userData.length / recordsPerPage);
+  for (let i = 1; i <= total; i++) {
+    let btn = document.createElement("button");
+    btn.id = `page-btn`;
+    btn.textContent = i;
+    pagesDiv.appendChild(btn);
+    btn.onclick = () => {
+      pre.disabled = false;
+      next.disabled = false;
+      msg.innerHTML = "";
+      currentPage = i;
+      displayData(pageIndexing(userData));
+    };
+  }
+  const pageBtn = document.getElementById(`page-btn`);
+  const next = document.createElement("button");
+  next.id = `next-btn`;
+  next.textContent = "Next";
+  pagesDiv.appendChild(next);
+
+  const pre = document.createElement("button");
+  pre.id = `prev-btn`;
+  pre.textContent = "Prev";
+  pagesDiv.insertBefore(pre, pageBtn);
+
+  const msg = document.getElementById("alert-msg");
+
+  const nextPrevBtns = (disBtnVal, btnVal, currentPageVal, condition) => {
+    disBtnVal.disabled = false;
+    msg.innerHTML = "";
+
+    if (condition) {
+      btnVal.disabled = true;
+      msg.style.color = "red";
+      msg.textContent = `No More Pages`;
+      return;
+    }
+    currentPageVal;
+    displayData(pageIndexing(userData));
+  };
+  next.onclick = () => {
+    nextPrevBtns(pre, next, currentPage++, currentPage > total);
+  };
+
+  pre.onclick = () => {
+    nextPrevBtns(next, pre, currentPage--, currentPage <= 0);
+  };
+  currentPage = 1;
 };

@@ -13,7 +13,7 @@
       onkeyup="filterByName()"
     />
     <select name="records" id="display-records" onchange="dataLimit()">
-      <option value="select">Select Range</option>
+      <option value="0">Select Range</option>
       <option value="5">5</option>
       <option value="10">10</option>
       <option value="15">15</option>
@@ -43,9 +43,10 @@
           <th id="table-head-action">Action</th>
         </tr>
       </thead>
-
       <tbody id="table-body"></tbody>
     </table>
+    <div id="pages-btns"></div>
+    <p id="alert-msg"></p>
     <h2 id="for-asc-dec-normal"></h2>
     <script src="index.js"></script>
   </body>
