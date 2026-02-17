@@ -4,49 +4,82 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Problem 2</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+      crossorigin="anonymous"
+    />
   </head>
   <body>
-    <button id="addBtn" onclick="createNewRow()">Add</button>
-    <input
-      id="name-filter-input"
-      placeholder="Search By Name"
-      onkeyup="filterByName()"
-    />
-    <select name="records" id="display-records" onchange="dataLimit()">
-      <option value="0">Select Range</option>
-      <option value="5">5</option>
-      <option value="10">10</option>
-      <option value="15">15</option>
-      <option value="20">20</option>
-      <option value="25">25</option>
-      <option value="30">30</option>
-    </select>
-
-    <table border="1">
-      <thead>
-        <tr id="table-head-row">
-          <th id="table-head-id" ondblclick="ascDecNormal('id', 'number')">
-            Id
-          </th>
-          <th id="table-head-name" ondblclick="ascDecNormal('name', 'string')">
-            Name
-          </th>
-          <th id="table-head-age" ondblclick="ascDecNormal('age', 'number')">
-            Age
-          </th>
-          <th
-            id="table-head-gender"
-            ondblclick="ascDecNormal('gender', 'string')"
+    <div style="margin-top: 20px" class="container-fluid">
+      <div class="row">
+        <div class="col-4 d-flex justify-content-between">
+          <h4>Click Here To Add New Row:</h4>
+          <button
+            id="addBtn"
+            onclick="createNewRow()"
+            class="btn btn-success btn-sm px-4"
           >
-            Gender
-          </th>
-          <th id="table-head-action">Action</th>
-        </tr>
-      </thead>
-      <tbody id="table-body"></tbody>
-    </table>
+            Add
+          </button>
+        </div>
+        <div class="col-4">
+          <input
+            id="name-filter-input"
+            class="form-control"
+            placeholder="Search By Name"
+            onkeyup="filterByName()"
+          />
+        </div>
+        <div class="col-4">
+          <select
+            name="records"
+            id="display-records"
+            class="form-select"
+            onchange="dataLimit()"
+          >
+            <option>Select Range</option>
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="15">15</option>
+            <option value="20">20</option>
+            <option value="25">25</option>
+            <option value="30">30</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top: 20px" class="container-fluid">
+      <table border="1" class="table table-light">
+        <thead>
+          <tr id="table-head-row">
+            <th id="table-head-id" ondblclick="ascDecNormal('id', 'number')">
+              Id
+            </th>
+            <th
+              id="table-head-name"
+              ondblclick="ascDecNormal('name', 'string')"
+            >
+              Name
+            </th>
+            <th id="table-head-age" ondblclick="ascDecNormal('age', 'number')">
+              Age
+            </th>
+            <th
+              id="table-head-gender"
+              ondblclick="ascDecNormal('gender', 'string')"
+            >
+              Gender
+            </th>
+            <th id="table-head-action">Action</th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
     <div id="pages-btns"></div>
-    <p id="alert-msg"></p>
+    <p id="alert-msg" class="text-danger"></p>
     <h2 id="for-asc-dec-normal"></h2>
     <script src="index.js"></script>
   </body>

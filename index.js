@@ -62,9 +62,12 @@ const dataRawRendering = (index, newUser) => {
   tdButtons.id = `td-buttons:${index}`;
   const editBtn = document.createElement("button");
   editBtn.textContent = "Edit";
+  editBtn.classList.add("btn", "btn-success", "btn-sm");
   editBtn.setAttribute("id", `editButton:${index}`);
   const deleteBtn = document.createElement("button");
   deleteBtn.textContent = "Delete";
+  deleteBtn.style.marginLeft = "10px";
+  deleteBtn.classList.add("btn", "btn-danger", "btn-sm");
   deleteBtn.setAttribute("id", `deleteBtn${index}`);
   tdButtons.append(editBtn, deleteBtn);
   dataRow.append(tdId, tdName, tdAge, tdGender, tdButtons);
@@ -91,18 +94,21 @@ const createNewRow = () => {
   newDataRow.id = "newDataRow";
   const idData = document.createElement("td");
   const idInput = document.createElement("input");
+  idInput.classList.add("form-control");
   idData.appendChild(idInput);
   idInput.setAttribute("id", `uid`);
   idInput.setAttribute("type", "number");
   idInput.setAttribute("placeholder", "Enter Id");
   const nameData = document.createElement("td");
   const nameInput = document.createElement("input");
+  nameInput.classList.add("form-control");
   nameData.appendChild(nameInput);
   nameInput.setAttribute("id", "name");
   nameInput.setAttribute("type", "text");
   nameInput.setAttribute("placeholder", "Enter Name");
   const ageData = document.createElement("td");
   const ageInput = document.createElement("input");
+  ageInput.classList.add("form-control");
   ageData.appendChild(ageInput);
   ageInput.setAttribute("id", "age");
   ageInput.setAttribute("type", "number");
@@ -119,16 +125,21 @@ const createNewRow = () => {
   genderFemaleInput.setAttribute("value", "female");
   genderMaleInput.setAttribute("name", "gender");
   genderFemaleInput.setAttribute("name", "gender");
+  genderMaleInput.classList.add("form-check-input");
+  genderFemaleInput.classList.add("form-check-input");
   genderData.appendChild(genderMaleInput);
   genderData.innerHTML += `<label for="female">Female</label>`;
   genderData.appendChild(genderFemaleInput);
   const buttonsColumn = document.createElement("td");
   const saveBtn = document.createElement("button");
   saveBtn.textContent = "Save";
+  saveBtn.classList.add("btn", "btn-primary", "btn-sm");
   saveBtn.setAttribute("id", "saveBtn");
   buttonsColumn.appendChild(saveBtn);
   const cancelBtn = document.createElement("button");
   cancelBtn.textContent = "Cancel";
+  cancelBtn.style.marginLeft = "10px";
+  cancelBtn.classList.add("btn", "btn-secondary", "btn-sm");
   cancelBtn.setAttribute("id", "cancelBtn");
   buttonsColumn.appendChild(cancelBtn);
   cancelBtn.addEventListener("click", () => {
@@ -164,43 +175,65 @@ const editDataRow = (funUser, index) => {
   const inputId = document.createElement("input");
   inputId.setAttribute("type", "number");
   inputId.value = funUser.id;
+  inputId.classList.add("form-control");
   tdId.appendChild(inputId);
   const tdName = document.createElement("td");
   const inputName = document.createElement("input");
   inputName.value = funUser.name;
+  inputName.classList.add("form-control");
   tdName.appendChild(inputName);
   const tdAge = document.createElement("td");
   const inputAge = document.createElement("input");
   inputAge.setAttribute("type", "number");
+  inputAge.classList.add("form-control");
   inputAge.value = funUser.age;
   tdAge.appendChild(inputAge);
+
   const tdGender = document.createElement("td");
   const inputMaleGender = document.createElement("input");
+  inputMaleGender.style.margin = "4px";
+
   inputMaleGender.setAttribute("type", "radio");
+  inputMaleGender.classList.add("form-check-input");
   inputMaleGender.setAttribute("id", "male");
   inputMaleGender.setAttribute("name", `gender-${index}`);
   inputMaleGender.setAttribute("value", "male");
-  if (funUser.gender === "male") {
-    inputMaleGender.checked = true;
-  }
+
   const inputFemaleGender = document.createElement("input");
+  inputFemaleGender.style.margin = "4px";
   inputFemaleGender.setAttribute("type", "radio");
+  inputFemaleGender.classList.add("form-check-input");
   inputFemaleGender.setAttribute("id", "female");
   inputFemaleGender.setAttribute("name", `gender-${index}`);
   inputFemaleGender.setAttribute("value", "female");
+
+  if (funUser.gender === "male") {
+    inputMaleGender.checked = true;
+  }
   if (funUser.gender === "female") {
     inputFemaleGender.checked = true;
   }
-  tdGender.innerHTML = `<label for="male">Male</label>`;
+
+  const maleLabel = document.createElement("label");
+  maleLabel.setAttribute("for", "male");
+  maleLabel.textContent = "Male";
   tdGender.appendChild(inputMaleGender);
-  tdGender.innerHTML += `<label for="female">Female</label>`;
+  tdGender.appendChild(maleLabel);
+  const femaleLabel = document.createElement("label");
+  femaleLabel.textContent = "Female";
+  femaleLabel.setAttribute("for", "female");
   tdGender.appendChild(inputFemaleGender);
+  tdGender.appendChild(femaleLabel);
+
   const tdAction = document.createElement("td");
   const saveBtn = document.createElement("button");
   saveBtn.textContent = "Save";
+  saveBtn.classList.add("btn", "btn-primary", "btn-sm");
   saveBtn.setAttribute("id", `saveBtn:${index}`);
   const cancelBtn = document.createElement("button");
   cancelBtn.textContent = "Cancel";
+  cancelBtn.style.marginLeft = "10px";
+  cancelBtn.classList.add("btn", "btn-secondary", "btn-sm");
   cancelBtn.setAttribute("id", `cancelBtn:${index}`);
   tdAction.append(saveBtn, cancelBtn);
   dataInputRow.append(tdId, tdName, tdAge, tdGender, tdAction);
@@ -253,6 +286,7 @@ const dblClickEdit = (index, field, type) => {
   const changedCell = document.createElement("td");
   changedCell.id = `td-change-${field}:${index}`;
   const changeInput = document.createElement("input");
+  changeInput.classList.add("form-control", "w-50");
   changeInput.oninput = () => {
     changeUser[field] = changeInput.value;
     setLocalStorage(userData);
@@ -277,6 +311,7 @@ const onGenderFocusOutEvent = (idx) => {
   const user = userData[idx];
   let tdGender = document.createElement("td");
   tdGender.id = `td-gender:${idx}`;
+
   tdGender.textContent = user.gender;
   tdGenderChange.replaceWith(tdGender);
   tdGender.ondblclick = () => onGenderDblClickEdit(idx);
@@ -296,6 +331,7 @@ const onGenderDblClickEdit = (index) => {
 
   const changeGenderFemale = document.createElement("input");
   changeGenderFemale.setAttribute("type", "radio");
+  changeGenderFemale.classList.add("form-check-input");
   changeGenderFemale.setAttribute("name", `gender-${index}`);
   changeGenderFemale.id = `change-female:${index}`;
   changeGenderFemale.value = "female";
@@ -310,6 +346,7 @@ const onGenderDblClickEdit = (index) => {
 
   const changeGenderMale = document.createElement("input");
   changeGenderMale.setAttribute("type", "radio");
+  changeGenderMale.classList.add("form-check-input");
   changeGenderMale.setAttribute("name", `gender-${index}`);
   changeGenderMale.id = `change-male:${index}`;
   changeGenderMale.value = "male";
@@ -323,7 +360,6 @@ const onGenderDblClickEdit = (index) => {
   });
   tdGenderChange.innerHTML = `<label for="change-male:${index}">Male</label>`;
   tdGenderChange.appendChild(changeGenderMale);
-
   const changeGenderFemaleLabel = document.createElement("label");
   changeGenderFemaleLabel.innerText = "Female";
   changeGenderFemaleLabel.setAttribute("for", `change-female:${index}`);
@@ -379,9 +415,6 @@ const dataLimit = () => {
   const topRecords = data.slice(0, limit);
   displayData(topRecords);
   renderPages();
-  if (limit === 0) {
-    displayData(pageIndexing(data));
-  }
 };
 
 const pageIndexing = (data) => {
@@ -395,27 +428,35 @@ const renderPages = () => {
   let total = Math.ceil(userData.length / recordsPerPage);
   for (let i = 1; i <= total; i++) {
     let btn = document.createElement("button");
+    btn.style.display = "inline-block";
+    btn.style.marginRight = "10px";
     btn.id = `page-btn`;
     btn.textContent = i;
+    btn.classList.add("btn", "btn-secondary", "btn-sm");
     pagesDiv.appendChild(btn);
     btn.onclick = () => {
-      pre.disabled = false;
-      next.disabled = false;
+      btnPrevious.disabled = false;
+      btnNext.disabled = false;
       msg.innerHTML = "";
       currentPage = i;
       displayData(pageIndexing(userData));
     };
   }
   const pageBtn = document.getElementById(`page-btn`);
-  const next = document.createElement("button");
-  next.id = `next-btn`;
-  next.textContent = "Next";
-  pagesDiv.appendChild(next);
+  const btnNext = document.createElement("button");
+  btnNext.id = `next-btn`;
+  btnNext.textContent = "Next";
+  btnNext.style.marginLeft = "15px";
+  btnNext.classList.add("btn", "btn-primary", "btn-sm");
+  pagesDiv.appendChild(btnNext);
 
-  const pre = document.createElement("button");
-  pre.id = `prev-btn`;
-  pre.textContent = "Prev";
-  pagesDiv.insertBefore(pre, pageBtn);
+  const btnPrevious = document.createElement("button");
+  btnPrevious.id = `prev-btn`;
+  btnPrevious.style.marginLeft = "15px";
+  btnPrevious.style.marginRight = "15px";
+  btnPrevious.textContent = "Prev";
+  btnPrevious.classList.add("btn", "btn-primary", "btn-sm");
+  pagesDiv.insertBefore(btnPrevious, pageBtn);
 
   const msg = document.getElementById("alert-msg");
 
@@ -425,19 +466,18 @@ const renderPages = () => {
 
     if (condition) {
       btnVal.disabled = true;
-      msg.style.color = "red";
       msg.textContent = `No More Pages`;
       return;
     }
     currentPageVal;
     displayData(pageIndexing(userData));
   };
-  next.onclick = () => {
-    nextPrevBtns(pre, next, currentPage++, currentPage > total);
+  btnNext.onclick = () => {
+    nextPrevBtns(btnPrevious, btnNext, currentPage++, currentPage > total);
   };
 
-  pre.onclick = () => {
-    nextPrevBtns(next, pre, currentPage--, currentPage <= 0);
+  btnPrevious.onclick = () => {
+    nextPrevBtns(btnNext, btnPrevious, currentPage--, currentPage <= 0);
   };
   currentPage = 1;
 };
