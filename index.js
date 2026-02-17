@@ -120,6 +120,8 @@ const createNewRow = () => {
   genderMaleInput.setAttribute("id", "male");
   genderFemaleInput.setAttribute("id", "female");
   genderMaleInput.setAttribute("type", "radio");
+  genderMaleInput.style.margin = "4px";
+  genderFemaleInput.style.margin = "4px";
   genderFemaleInput.setAttribute("type", "radio");
   genderMaleInput.setAttribute("value", "male");
   genderFemaleInput.setAttribute("value", "female");
@@ -192,7 +194,6 @@ const editDataRow = (funUser, index) => {
   const tdGender = document.createElement("td");
   const inputMaleGender = document.createElement("input");
   inputMaleGender.style.margin = "4px";
-
   inputMaleGender.setAttribute("type", "radio");
   inputMaleGender.classList.add("form-check-input");
   inputMaleGender.setAttribute("id", "male");
@@ -217,13 +218,13 @@ const editDataRow = (funUser, index) => {
   const maleLabel = document.createElement("label");
   maleLabel.setAttribute("for", "male");
   maleLabel.textContent = "Male";
-  tdGender.appendChild(inputMaleGender);
   tdGender.appendChild(maleLabel);
+  tdGender.appendChild(inputMaleGender);
   const femaleLabel = document.createElement("label");
   femaleLabel.textContent = "Female";
   femaleLabel.setAttribute("for", "female");
-  tdGender.appendChild(inputFemaleGender);
   tdGender.appendChild(femaleLabel);
+  tdGender.appendChild(inputFemaleGender);
 
   const tdAction = document.createElement("td");
   const saveBtn = document.createElement("button");
@@ -331,6 +332,7 @@ const onGenderDblClickEdit = (index) => {
 
   const changeGenderFemale = document.createElement("input");
   changeGenderFemale.setAttribute("type", "radio");
+  changeGenderFemale.style.margin = "4px";
   changeGenderFemale.classList.add("form-check-input");
   changeGenderFemale.setAttribute("name", `gender-${index}`);
   changeGenderFemale.id = `change-female:${index}`;
@@ -346,6 +348,7 @@ const onGenderDblClickEdit = (index) => {
 
   const changeGenderMale = document.createElement("input");
   changeGenderMale.setAttribute("type", "radio");
+  changeGenderMale.style.margin = "4px";
   changeGenderMale.classList.add("form-check-input");
   changeGenderMale.setAttribute("name", `gender-${index}`);
   changeGenderMale.id = `change-male:${index}`;
