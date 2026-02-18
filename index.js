@@ -318,7 +318,6 @@ const onGenderFocusOutEvent = (idx) => {
   const user = userData[idx];
   let tdGender = document.createElement("td");
   tdGender.id = `td-gender:${idx}`;
-
   tdGender.textContent = user.gender;
   tdGenderChange.replaceWith(tdGender);
   tdGender.ondblclick = () => onGenderDblClickEdit(idx);
