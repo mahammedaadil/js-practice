@@ -19,7 +19,7 @@ const getLocalStorage = () => {
 
 window.addEventListener("load", () => {
   userData = getLocalStorage() || [];
-  displayData(pageIndexing(userData));
+  displayData(userData);
   renderPages();
 });
 
@@ -29,10 +29,16 @@ window.addEventListener("click", (e) => {
   }
 });
 
-const displayData = (users) => {
+const displayData = (data) => {
   tableBody.innerHTML = "";
-  users.forEach((user, index) => {
-    dataRawRendering(index, user);
+  const startIndex = (currentPage - 1) * recordsPerPage;
+  const endIndex = startIndex + recordsPerPage;
+
+  const pageData = data.slice(startIndex, endIndex);
+
+  pageData.forEach((user, index) => {
+    const actualIndex = startIndex + index;
+    dataRawRendering(actualIndex, user);
   });
 };
 
@@ -50,6 +56,7 @@ const dataRawRendering = (index, newUser) => {
   tdName.id = `td-name:${index}`;
   tdName.textContent = newUser.name;
   tdName.ondblclick = () => dblClickEdit(index, "name", "text");
+
   const tdAge = document.createElement("td");
   tdAge.id = `td-age:${index}`;
   tdAge.textContent = newUser.age;
@@ -75,7 +82,7 @@ const dataRawRendering = (index, newUser) => {
   deleteBtn.addEventListener("click", () => {
     addBtn.disabled = false;
     deleteData(index);
-    displayData(pageIndexing(userData));
+    displayData(userData);
     renderPages();
   });
   editBtn.onclick = () => {
@@ -161,11 +168,10 @@ const createNewRow = () => {
     };
     userData.push(newData);
     setLocalStorage(userData);
-    displayData(pageIndexing(userData));
+    displayData(userData);
     renderPages();
   });
 };
-
 const editDataRow = (funUser, index) => {
   if (currentEditId != null)
     dataRawRendering(currentEditId, userData[currentEditId]);
@@ -242,30 +248,31 @@ const editDataRow = (funUser, index) => {
   if (dataInputRow) {
     addBtn.disabled = true;
   }
+
   saveBtn.onclick = () => {
     addBtn.disabled = false;
-    const data = getLocalStorage();
-    const updatadData = data.map((userData, idx) => {
+    const updatadData = userData.map((data, idx) => {
       if (idx === index) {
-        userData.id = inputId.value;
-        userData.name = inputName.value;
-        userData.age = inputAge.value;
-        userData.gender = document.querySelector(
+        data.id = inputId.value;
+        data.name = inputName.value;
+        data.age = inputAge.value;
+        data.gender = document.querySelector(
           `input[name=gender-${idx}]:checked`,
         ).value;
       }
-      return userData;
+      return data;
     });
+
     setLocalStorage(updatadData);
     userData = updatadData;
     currentEditId = null;
-    displayData(pageIndexing(userData));
+    displayData(userData);
     renderPages();
   };
   cancelBtn.addEventListener("click", () => {
     addBtn.disabled = false;
     currentEditId = null;
-    displayData(pageIndexing(userData));
+    displayData(userData);
     renderPages();
   });
 };
@@ -281,7 +288,6 @@ const dblClickEdit = (index, field, type) => {
   if (currentGenderEditIndex != null) {
     onGenderFocusOutEvent(currentGenderEditIndex);
   }
-
   const changeUser = userData[index];
   const cell = document.getElementById(`td-${field}:${index}`);
   const changedCell = document.createElement("td");
@@ -388,16 +394,16 @@ const compare = (key, type) => {
 const ascDecNormal = (key, type) => {
   if (switchMode === 0) {
     const dec = userData.toSorted(compare(key, type));
-    displayData(pageIndexing(dec));
+    displayData(dec);
     renderPages();
     switchMode += 1;
   } else if (switchMode === 1) {
     const asc = userData.toSorted(compare(key, type));
-    displayData(pageIndexing(asc));
+    displayData(asc);
     renderPages();
     switchMode += 1;
   } else {
-    displayData(pageIndexing(userData));
+    displayData(userData);
     switchMode = 0;
   }
 };
@@ -407,7 +413,7 @@ const filterByName = () => {
   const filteredData = userData.filter((user) => {
     return user.name.toUpperCase().includes(toSearch);
   });
-  displayData(pageIndexing(filteredData));
+  displayData(filteredData);
   renderPages();
 };
 
@@ -420,20 +426,14 @@ const dataLimit = () => {
   renderPages();
 };
 
-const pageIndexing = (data) => {
-  let startIndex = (currentPage - 1) * recordsPerPage;
-  let endIndex = startIndex + recordsPerPage;
-  return data.slice(startIndex, endIndex);
-};
-
-const renderPages = () => {
+const renderPages = (index) => {
   pagesDiv.innerHTML = "";
   let total = Math.ceil(userData.length / recordsPerPage);
   for (let i = 1; i <= total; i++) {
     let btn = document.createElement("button");
     btn.style.display = "inline-block";
     btn.style.marginRight = "10px";
-    btn.id = `page-btn`;
+    btn.id = `page-btn:${index}`;
     btn.textContent = i;
     btn.classList.add("btn", "btn-secondary", "btn-sm");
     pagesDiv.appendChild(btn);
@@ -442,10 +442,10 @@ const renderPages = () => {
       btnNext.disabled = false;
       msg.innerHTML = "";
       currentPage = i;
-      displayData(pageIndexing(userData));
+      displayData(userData);
     };
   }
-  const pageBtn = document.getElementById(`page-btn`);
+  const pageBtn = document.getElementById(`page-btn:${index}`);
   const btnNext = document.createElement("button");
   btnNext.id = `next-btn`;
   btnNext.textContent = "Next";
@@ -473,7 +473,7 @@ const renderPages = () => {
       return;
     }
     currentPageVal;
-    displayData(pageIndexing(userData));
+    displayData(userData);
   };
   btnNext.onclick = () => {
     nextPrevBtns(btnPrevious, btnNext, currentPage++, currentPage > total);
