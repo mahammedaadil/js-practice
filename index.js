@@ -463,12 +463,10 @@ const renderPages = () => {
   const maxVisible = 5;
   let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
   let end = start + maxVisible - 1;
-
   if (end > total) {
     end = total;
     start = Math.max(1, end - maxVisible + 1);
   }
-
   for (let i = start; i <= end; i++) {
     let btn = document.createElement("button");
     btn.style.display = "inline-block";
@@ -485,6 +483,7 @@ const renderPages = () => {
     if (currentPage === i) {
       btn.classList.remove("btn-secondary");
       btn.classList.add("btn-primary");
+      btn.style.background = "silver";
     }
     btn.onclick = () => {
       currentPage = i;
