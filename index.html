@@ -15,11 +15,16 @@
     <div style="margin-top: 20px" class="container-fluid">
       <div class="row">
         <div class="col-4 d-flex justify-content-between">
-          <h4>Click Here To Add New Row:</h4>
+          <h5
+            style="display: flex; justify-content: center; align-items: center"
+          >
+            Click Add Button To Add New Row:
+          </h5>
           <button
             id="addBtn"
             onclick="createNewRow()"
-            class="btn btn-success btn-sm px-4"
+            style="padding-right: 35px; padding-left: 35px"
+            class="btn btn-success btn-sm"
           >
             Add
           </button>
@@ -78,8 +83,8 @@
         <tbody id="table-body"></tbody>
       </table>
     </div>
-    <div id="pages-btns"></div>
-    <p id="alert-msg" class="text-danger"></p>
+    <div id="pages-btns" class="pagination"></div>
+
     <h2 id="for-asc-dec-normal"></h2>
     <script src="index.js"></script>
   </body>

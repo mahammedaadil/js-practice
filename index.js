@@ -2,12 +2,27 @@ const tableBody = document.getElementById("table-body");
 const searchInput = document.getElementById("name-filter-input");
 let dropDown = document.getElementById("display-records");
 const pagesDiv = document.getElementById("pages-btns");
+const alertMsg = document.getElementById("alert-msg");
 let switchMode = 0;
 let currentEditId = null;
 let userData = [];
 let currentPage = 1;
 let recordsPerPage = 5;
 let currentGenderEditIndex = null;
+
+const pageWiseDisplay = (data) => {
+  tableBody.innerHTML = "";
+
+  data.forEach((user, index) => {
+    dataRawRendering(index, user);
+  });
+};
+
+const findIndexedData = (data) => {
+  const startIndex = (currentPage - 1) * recordsPerPage;
+  const endIndex = startIndex + recordsPerPage;
+  return data.slice(startIndex, endIndex);
+};
 
 const setLocalStorage = (data) => {
   localStorage.setItem("userData", JSON.stringify(data));
@@ -35,14 +50,13 @@ const displayData = (data) => {
   const endIndex = startIndex + recordsPerPage;
 
   const pageData = data.slice(startIndex, endIndex);
-
   pageData.forEach((user, index) => {
     const actualIndex = startIndex + index;
     dataRawRendering(actualIndex, user);
   });
 };
 
-const dataRawRendering = (index, newUser) => {
+const dataRawRendering = (index, user) => {
   const dataRow = document.createElement("tr");
   dataRow.id = `dataRow:${index}`;
   const editableDataRaw = document.getElementById(
@@ -50,21 +64,21 @@ const dataRawRendering = (index, newUser) => {
   );
   const tdId = document.createElement("td");
   tdId.id = `td-id:${index}`;
-  tdId.textContent = newUser.id;
+  tdId.textContent = user.id;
   tdId.ondblclick = () => dblClickEdit(index, "id", "number");
   const tdName = document.createElement("td");
   tdName.id = `td-name:${index}`;
-  tdName.textContent = newUser.name;
+  tdName.textContent = user.name;
   tdName.ondblclick = () => dblClickEdit(index, "name", "text");
 
   const tdAge = document.createElement("td");
   tdAge.id = `td-age:${index}`;
-  tdAge.textContent = newUser.age;
+  tdAge.textContent = user.age;
   tdAge.ondblclick = () => dblClickEdit(index, "age", "number");
   const tdGender = document.createElement("td");
   tdGender.ondblclick = () => onGenderDblClickEdit(index);
   tdGender.id = `td-gender:${index}`;
-  tdGender.textContent = newUser.gender;
+  tdGender.textContent = user.gender;
   const tdButtons = document.createElement("td");
   tdButtons.id = `td-buttons:${index}`;
   const editBtn = document.createElement("button");
@@ -88,7 +102,7 @@ const dataRawRendering = (index, newUser) => {
   editBtn.onclick = () => {
     const newDataRow = document.getElementById("newDataRow");
     if (newDataRow) newDataRow.remove();
-    editDataRow(newUser, index);
+    editDataRow(user, index);
   };
   if (editableDataRaw) {
     editableDataRaw.replaceWith(dataRow);
@@ -172,7 +186,8 @@ const createNewRow = () => {
     renderPages();
   });
 };
-const editDataRow = (funUser, index) => {
+
+const editDataRow = (user, index) => {
   if (currentEditId != null)
     dataRawRendering(currentEditId, userData[currentEditId]);
   currentEditId = index;
@@ -182,19 +197,19 @@ const editDataRow = (funUser, index) => {
   const tdId = document.createElement("td");
   const inputId = document.createElement("input");
   inputId.setAttribute("type", "number");
-  inputId.value = funUser.id;
+  inputId.value = user.id;
   inputId.classList.add("form-control");
   tdId.appendChild(inputId);
   const tdName = document.createElement("td");
   const inputName = document.createElement("input");
-  inputName.value = funUser.name;
+  inputName.value = user.name;
   inputName.classList.add("form-control");
   tdName.appendChild(inputName);
   const tdAge = document.createElement("td");
   const inputAge = document.createElement("input");
   inputAge.setAttribute("type", "number");
   inputAge.classList.add("form-control");
-  inputAge.value = funUser.age;
+  inputAge.value = user.age;
   tdAge.appendChild(inputAge);
 
   const tdGender = document.createElement("td");
@@ -214,10 +229,10 @@ const editDataRow = (funUser, index) => {
   inputFemaleGender.setAttribute("name", `gender-${index}`);
   inputFemaleGender.setAttribute("value", "female");
 
-  if (funUser.gender === "male") {
+  if (user.gender === "male") {
     inputMaleGender.checked = true;
   }
-  if (funUser.gender === "female") {
+  if (user.gender === "female") {
     inputFemaleGender.checked = true;
   }
 
@@ -329,12 +344,10 @@ const onGenderDblClickEdit = (index) => {
   const tdGender = document.getElementById(`td-gender:${index}`);
   const tdGenderChange = document.createElement("td");
   tdGenderChange.id = `td-gender-change:${index}`;
-
   if (currentGenderEditIndex != null) {
     onGenderFocusOutEvent(currentGenderEditIndex);
   }
   currentGenderEditIndex = index;
-
   const changeGenderFemale = document.createElement("input");
   changeGenderFemale.setAttribute("type", "radio");
   changeGenderFemale.style.margin = "4px";
@@ -391,32 +404,38 @@ const compare = (key, type) => {
 };
 
 const ascDecNormal = (key, type) => {
+  const orderedPageWise = findIndexedData(userData);
   if (switchMode === 0) {
-    const dec = userData.toSorted(compare(key, type));
-    displayData(dec);
+    document.body.style.background = "red";
+    const dec = orderedPageWise.toSorted(compare(key, type));
+    pageWiseDisplay(dec);
     renderPages();
     switchMode += 1;
   } else if (switchMode === 1) {
-    const asc = userData.toSorted(compare(key, type));
-    displayData(asc);
+    document.body.style.background = "blue";
+    const asc = orderedPageWise.toSorted(compare(key, type));
+    pageWiseDisplay(asc);
     renderPages();
     switchMode += 1;
   } else {
+    document.body.style.background = "green";
     displayData(userData);
     switchMode = 0;
   }
 };
 
 const filterByName = () => {
+  const pageWiseFilter = findIndexedData(userData);
   const toSearch = searchInput.value.toUpperCase();
-  const filteredData = userData.filter((user) => {
+  const filteredData = pageWiseFilter.filter((user) => {
     return user.name.toUpperCase().includes(toSearch);
   });
-  displayData(filteredData);
   renderPages();
+  pageWiseDisplay(filteredData);
 };
 
 const dataLimit = () => {
+  currentPage = 1;
   const data = userData;
   const limit = parseInt(dropDown.value);
   recordsPerPage = limit;
@@ -425,32 +444,9 @@ const dataLimit = () => {
   renderPages();
 };
 
-const renderPages = (index) => {
+const renderPages = () => {
   pagesDiv.innerHTML = "";
   let total = Math.ceil(userData.length / recordsPerPage);
-  for (let i = 1; i <= total; i++) {
-    let btn = document.createElement("button");
-    btn.style.display = "inline-block";
-    btn.style.marginRight = "10px";
-    btn.id = `page-btn:${index}`;
-    btn.textContent = i;
-    btn.classList.add("btn", "btn-secondary", "btn-sm");
-    pagesDiv.appendChild(btn);
-    btn.onclick = () => {
-      btnPrevious.disabled = false;
-      btnNext.disabled = false;
-      msg.innerHTML = "";
-      currentPage = i;
-      displayData(userData);
-    };
-  }
-  const pageBtn = document.getElementById(`page-btn:${index}`);
-  const btnNext = document.createElement("button");
-  btnNext.id = `next-btn`;
-  btnNext.textContent = "Next";
-  btnNext.style.marginLeft = "15px";
-  btnNext.classList.add("btn", "btn-primary", "btn-sm");
-  pagesDiv.appendChild(btnNext);
 
   const btnPrevious = document.createElement("button");
   btnPrevious.id = `prev-btn`;
@@ -458,28 +454,62 @@ const renderPages = (index) => {
   btnPrevious.style.marginRight = "15px";
   btnPrevious.textContent = "Prev";
   btnPrevious.classList.add("btn", "btn-primary", "btn-sm");
-  pagesDiv.insertBefore(btnPrevious, pageBtn);
+  const btnNext = document.createElement("button");
+  btnNext.id = `next-btn`;
+  btnNext.textContent = "Next";
+  btnNext.style.marginLeft = "15px";
+  btnNext.classList.add("btn", "btn-primary", "btn-sm");
 
-  const msg = document.getElementById("alert-msg");
+  const maxVisible = 5;
+  let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+  let end = start + maxVisible - 1;
 
-  const nextPrevBtns = (disBtnVal, btnVal, currentPageVal, condition) => {
-    disBtnVal.disabled = false;
-    msg.innerHTML = "";
+  if (end > total) {
+    end = total;
+    start = Math.max(1, end - maxVisible + 1);
+  }
 
-    if (condition) {
-      btnVal.disabled = true;
-      msg.textContent = `No More Pages`;
-      return;
+  for (let i = start; i <= end; i++) {
+    let btn = document.createElement("button");
+    btn.style.display = "inline-block";
+    btn.style.marginRight = "10px";
+    btn.id = `page-btn:${i}`;
+    btn.textContent = i;
+    btn.classList.add(
+      "btn",
+      "btn-secondary",
+      "btn-sm",
+      "page-item",
+      "page-link",
+    );
+    if (currentPage === i) {
+      btn.classList.remove("btn-secondary");
+      btn.classList.add("btn-primary");
     }
-    currentPageVal;
-    displayData(userData);
-  };
+    btn.onclick = () => {
+      currentPage = i;
+      renderPages();
+      displayData(userData);
+    };
+
+    pagesDiv.appendChild(btn);
+  }
+
+  pagesDiv.appendChild(btnNext);
+  pagesDiv.prepend(btnPrevious);
   btnNext.onclick = () => {
-    nextPrevBtns(btnPrevious, btnNext, currentPage++, currentPage > total);
+    if (currentPage < total) {
+      currentPage++;
+      renderPages();
+      displayData(userData);
+    }
   };
 
   btnPrevious.onclick = () => {
-    nextPrevBtns(btnNext, btnPrevious, currentPage--, currentPage <= 0);
+    if (currentPage > 1) {
+      currentPage--;
+      renderPages();
+      displayData(userData);
+    }
   };
-  currentPage = 1;
 };
