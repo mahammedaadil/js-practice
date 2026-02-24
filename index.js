@@ -2,7 +2,6 @@ const tableBody = document.getElementById("table-body");
 const searchInput = document.getElementById("name-filter-input");
 let dropDown = document.getElementById("display-records");
 const pagesDiv = document.getElementById("pages-btns");
-const alertMsg = document.getElementById("alert-msg");
 let switchMode = 0;
 let currentEditId = null;
 let userData = [];
@@ -54,6 +53,7 @@ const displayData = (data) => {
     const actualIndex = startIndex + index;
     dataRawRendering(actualIndex, user);
   });
+  dropDown.disabled = false;
 };
 
 const dataRawRendering = (index, user) => {
@@ -110,6 +110,7 @@ const dataRawRendering = (index, user) => {
 };
 
 const createNewRow = () => {
+  dropDown.disabled = true;
   if (document.getElementById(`uid`)) return;
   const newDataRow = document.createElement("tr");
   newDataRow.id = "newDataRow";
@@ -437,8 +438,9 @@ const filterByName = () => {
 const dataLimit = () => {
   currentPage = 1;
   const data = userData;
-  const limit = parseInt(dropDown.value);
+  let limit = parseInt(dropDown.value);
   recordsPerPage = limit;
+  if (limit === 0) limit = 5;
   const topRecords = data.slice(0, limit);
   displayData(topRecords);
   renderPages();
@@ -447,18 +449,17 @@ const dataLimit = () => {
 const renderPages = () => {
   pagesDiv.innerHTML = "";
   let total = Math.ceil(userData.length / recordsPerPage);
-
-  const btnPrevious = document.createElement("button");
-  btnPrevious.id = `prev-btn`;
-  btnPrevious.style.marginLeft = "15px";
-  btnPrevious.style.marginRight = "15px";
-  btnPrevious.textContent = "Prev";
-  btnPrevious.classList.add("btn", "btn-primary", "btn-sm");
-  const btnNext = document.createElement("button");
-  btnNext.id = `next-btn`;
-  btnNext.textContent = "Next";
-  btnNext.style.marginLeft = "15px";
-  btnNext.classList.add("btn", "btn-primary", "btn-sm");
+  const firstBtn = document.createElement("button");
+  firstBtn.id = `first-btn`;
+  firstBtn.style.marginLeft = "15px";
+  firstBtn.style.marginRight = "15px";
+  firstBtn.textContent = "First";
+  firstBtn.classList.add("btn", "btn-primary", "btn-sm");
+  const lastBtn = document.createElement("button");
+  lastBtn.id = `last-btn`;
+  lastBtn.textContent = "Last";
+  lastBtn.style.marginLeft = "15px";
+  lastBtn.classList.add("btn", "btn-primary", "btn-sm");
 
   const maxVisible = 5;
   let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
@@ -480,35 +481,30 @@ const renderPages = () => {
       "page-item",
       "page-link",
     );
-    if (currentPage === i) {
-      btn.classList.remove("btn-secondary");
-      btn.classList.add("btn-primary");
-      btn.style.background = "silver";
-    }
+    if (currentPage === i) btn.style.background = "silver";
     btn.onclick = () => {
       currentPage = i;
       renderPages();
       displayData(userData);
+      searchInput.value = "";
     };
-
     pagesDiv.appendChild(btn);
   }
+  pagesDiv.appendChild(lastBtn);
+  pagesDiv.prepend(firstBtn);
 
-  pagesDiv.appendChild(btnNext);
-  pagesDiv.prepend(btnPrevious);
-  btnNext.onclick = () => {
-    if (currentPage < total) {
-      currentPage++;
-      renderPages();
-      displayData(userData);
-    }
+  lastBtn.onclick = () => {
+    currentPage = total;
+    displayData(userData);
+    renderPages();
+    searchInput.value = "";
   };
 
-  btnPrevious.onclick = () => {
-    if (currentPage > 1) {
-      currentPage--;
-      renderPages();
-      displayData(userData);
-    }
+  firstBtn.onclick = () => {
+    firstBtn.disabled = true;
+    currentPage = 1;
+    displayData(userData);
+    renderPages();
+    searchInput.value = "";
   };
 };
