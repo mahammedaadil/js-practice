@@ -470,17 +470,10 @@ const renderPages = () => {
   }
   for (let i = start; i <= end; i++) {
     let btn = document.createElement("button");
-    btn.style.display = "inline-block";
     btn.style.marginRight = "10px";
     btn.id = `page-btn:${i}`;
     btn.textContent = i;
-    btn.classList.add(
-      "btn",
-      "btn-secondary",
-      "btn-sm",
-      "page-item",
-      "page-link",
-    );
+    btn.classList.add("btn", "btn-secondary", "btn-sm", "page-link");
     if (currentPage === i) btn.style.background = "silver";
     btn.onclick = () => {
       currentPage = i;
@@ -501,7 +494,6 @@ const renderPages = () => {
   };
 
   firstBtn.onclick = () => {
-    firstBtn.disabled = true;
     currentPage = 1;
     displayData(userData);
     renderPages();
