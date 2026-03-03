@@ -269,6 +269,7 @@ const onGenderDblClickEdit = (index) => {
   $(mainGenderCell).replaceWith($changeGenderCell);
   const maleGender = document.getElementById(`change-male:${index}`);
   const femaleGender = document.getElementById(`change-female:${index}`);
+  const changeGenderCell = document.getElementById(`td-gender-change:${index}`);
 
   if (changeUser.gender == "male") {
     maleGender.checked = true;
@@ -279,26 +280,17 @@ const onGenderDblClickEdit = (index) => {
     changeUser.gender = maleGender.value;
     setLocalStorage(userData);
   });
-  $(maleGender).on("focusout", () => {
-    const $newcell = $(`<td id="td-gender:${index}">${changeUser.gender}</td>`);
-    $changeGenderCell.replaceWith($newcell);
-    $(document.getElementById(`td-gender:${index}`)).on("dblclick", () => {
-      onGenderDblClickEdit(index);
-    });
-  });
 
   $(femaleGender).on("click", () => {
     changeUser.gender = femaleGender.value;
     setLocalStorage(userData);
+  });
 
-    $(femaleGender).on("focusout", () => {
-      const $newcell = $(
-        `<td id="td-gender:${index}">${changeUser.gender}</td>`,
-      );
-      $changeGenderCell.replaceWith($newcell);
-      $(document.getElementById(`td-gender:${index}`)).on("dblclick", () => {
-        onGenderDblClickEdit(index);
-      });
+  $(changeGenderCell).on("mouseleave", () => {
+    const $newcell = $(`<td id="td-gender:${index}">${changeUser.gender}</td>`);
+    $changeGenderCell.replaceWith($newcell);
+    $(document.getElementById(`td-gender:${index}`)).on("dblclick", () => {
+      onGenderDblClickEdit(index);
     });
   });
 };
