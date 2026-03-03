@@ -40,7 +40,6 @@ const displayData = (data) => {
   const startIndex = (currentPage - 1) * recordsPerPage;
   const endIndex = startIndex + recordsPerPage;
   const pageData = data.slice(startIndex, endIndex);
-
   pageData.forEach((user, index) => {
     const actualIndex = startIndex + index;
     dataRawRendering(actualIndex, user);
