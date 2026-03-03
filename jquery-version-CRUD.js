@@ -246,7 +246,7 @@ const dblClickEdit = (index, field, type) => {
     setLocalStorage(userData);
   });
 
-  $(inputElement).on("focusout", () => {
+  $(inputElement).on("mouseleave", () => {
     const $newcell = $(
       `<td id="td-${field}:${index}">${changeUser[field]}</td>`,
     );
