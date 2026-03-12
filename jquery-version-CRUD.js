@@ -1,7 +1,7 @@
 const $tableBody = $("#table-body");
-const searchInput = document.getElementById("name-filter-input");
-let dropDown = document.getElementById("display-records");
-const pagesDiv = document.getElementById("pages-btns");
+const $searchInput = $(`#name-filter-input`);
+let $dropDown = $("#display-records");
+const $pagesDiv = $("#pages-btns");
 let switchMode = 0;
 let currentEditId = null;
 let userData = [];
@@ -44,7 +44,7 @@ const displayData = (data) => {
     const actualIndex = startIndex + index;
     dataRawRendering(actualIndex, user);
   });
-  dropDown.disabled = false;
+  $dropDown.prop("disabled", false);
 };
 
 const dataRawRendering = (index, user) => {
@@ -102,7 +102,7 @@ const dataRawRendering = (index, user) => {
 };
 
 const createNewRow = () => {
-  dropDown.disabled = true;
+  $dropDown.prop("disabled", true);
   if (document.getElementById(`uid`)) return;
   const $newDataRow = $(`<tr id="newDataRow"></tr>`);
   const $idData = $(
@@ -332,7 +332,7 @@ const ascDecNormal = (key, type) => {
 
 const filterByName = () => {
   const pageWiseFilter = findIndexedData(userData);
-  const toSearch = searchInput.value.toUpperCase();
+  const toSearch = $($searchInput).val().toUpperCase();
   const filteredData = pageWiseFilter.filter((user) => {
     return user.name.toUpperCase().includes(toSearch);
   });
@@ -343,7 +343,7 @@ const filterByName = () => {
 const dataLimit = () => {
   currentPage = 1;
   const data = userData;
-  let limit = parseInt(dropDown.value);
+  let limit = parseInt($dropDown.val());
   recordsPerPage = limit;
   if (limit === 0) limit = 5;
   const topRecords = data.slice(0, limit);
@@ -352,7 +352,7 @@ const dataLimit = () => {
 };
 
 const renderPages = () => {
-  pagesDiv.innerHTML = "";
+  $pagesDiv.html("");
   let total = Math.ceil(userData.length / recordsPerPage);
   const $firstBtn = $(
     `<button id="first-btn" style="margin-left:20px;margin-right:30px;" class="btn btn-primary btn-sm">First</button>`,
@@ -371,32 +371,30 @@ const renderPages = () => {
     let $btn = $(
       `<button id="page-btn:${i}" style="margin-right:10px;" class="btn btn-secondary btn-sm page-link">${i}</button>`,
     );
-    $(pagesDiv).append($btn);
+    $($pagesDiv).append($btn);
     let btn = document.getElementById(`page-btn:${i}`);
     if (currentPage === i) btn.style.background = "silver";
     $(btn).on("click", () => {
       currentPage = i;
       renderPages();
       displayData(userData);
-      searchInput.value = "";
+      $searchInput.val("");
     });
   }
-  $(pagesDiv).prepend($firstBtn);
-  $(pagesDiv).append($lastBtn);
+  $($pagesDiv).prepend($firstBtn);
+  $($pagesDiv).append($lastBtn);
 
-  const firstBtn = document.getElementById(`first-btn`);
-  const lastBtn = document.getElementById(`last-btn`);
-  $(lastBtn).on("click", () => {
+  $("#last-btn").on("click", () => {
     currentPage = total;
     displayData(userData);
     renderPages();
-    searchInput.value = "";
+    $searchInput.val("");
   });
 
-  $(firstBtn).on("click", () => {
+  $("#first-btn").on("click", () => {
     currentPage = 1;
     displayData(userData);
     renderPages();
-    searchInput.value = "";
+    $searchInput.val("");
   });
 };
